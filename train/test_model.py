@@ -1,3 +1,4 @@
+import pytest
 from model import Loader, Trainer, Evaluator
 import pandas as pd
 from category_encoders import TargetEncoder
@@ -5,8 +6,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 
-TRAIN_FILE_PATH = 'train.csv'
-TEST_FILE_PATH = 'test.csv'
+TRAIN_FILE_PATH = 'train/train.csv'
+TEST_FILE_PATH = 'train/test.csv'
 FEATURES = ['type', 'sector', 'net_usable_area', 'net_area', 'n_rooms', 'n_bathroom', 'latitude', 'longitude', 'price']
 FEATURE_TYPES = ['object', 'object', 'float64', 'float64', 'float64', 'float64', 'float64', 'float64', 'int64']
 NUMBER_OF_FEATURES = 9
@@ -21,11 +22,21 @@ def test_loader():
     loader = Loader(TRAIN_FILE_PATH, TEST_FILE_PATH)
     assert type(loader.train) == pd.DataFrame
     assert type(loader.test) == pd.DataFrame
-    assert type(loader.train_columns) == list
+    assert type(loader.get_train_columns) == list
     assert loader.train.columns.values.tolist() == loader.test.columns.values.tolist()
     assert loader.train.columns.values.tolist() == FEATURES
     assert loader.train.dtypes.values.tolist() == loader.test.dtypes.values.tolist()
     assert loader.train.dtypes.values.tolist() == FEATURE_TYPES
+
+
+@pytest.mark.parametrize("train_path, test_path, expected",
+                         [('', TEST_FILE_PATH, "The train_path parameter provided is invalid."),
+                          (TRAIN_FILE_PATH, '', "The test_path parameter provided is invalid.")])
+def test_empty_file_paths(train_path, test_path, expected):
+    try:
+        loader = Loader(train_path, test_path)
+    except Exception as e:
+        assert e.message == expected
 
 
 def test_trainer():
@@ -50,4 +61,3 @@ def test_evaluator():
     assert evaluator.rmse < RMSE_THRESHOLD
     assert evaluator.mape < MAPE_THRESHOLD
     assert evaluator.mae < MAE_THRESHOLD
-

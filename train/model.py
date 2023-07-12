@@ -5,9 +5,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error
+from exceptions import InvalidPath
 
-# TRAIN_FILE_NAME = 'train.csv'
-# TEST_FILE_NAME = 'test.csv'
 CATEGORICAL_COLUMNS = ["type", "sector"]
 TARGET_COLUMN = "price"
 COLUMNS_TO_IGNORE = ['id', 'target']
@@ -20,12 +19,21 @@ LOSS = "absolute_error"
 
 class Loader:
     def __init__(self, train_path: str, test_path: str):
+        Loader._validate_paths(train_path, test_path)
         self.train = pd.read_csv(train_path)
         self.test = pd.read_csv(test_path)
 
     @property
-    def train_columns(self) -> list[str]:
+    def get_train_columns(self) -> list[str]:
         return [col for col in self.train.columns if col not in COLUMNS_TO_IGNORE]
+
+    @staticmethod
+    def _validate_paths(train_path, test_path):
+        if not train_path:
+            raise InvalidPath("train_path")
+        elif not test_path:
+            raise InvalidPath("test_path")
+        return
 
 
 class Trainer:
@@ -45,12 +53,12 @@ class Trainer:
         self.train_model(loader)
 
     def train_model(self, loader: Loader):
-        self.pipeline.fit(loader.train[loader.train_columns], loader.train[TARGET_COLUMN])
+        self.pipeline.fit(loader.train[loader.get_train_columns], loader.train[TARGET_COLUMN])
 
 
 class Evaluator:
     def __init__(self, loader: Loader, trainer: Trainer):
-        self.predictions = trainer.pipeline.predict(loader.test[loader.train_columns])
+        self.predictions = trainer.pipeline.predict(loader.test[loader.get_train_columns])
         self.target = loader.test[TARGET_COLUMN].values
         self.rmse = np.sqrt(mean_squared_error(self.predictions, self.target))
         self.mape = mean_absolute_percentage_error(self.predictions, self.target)
