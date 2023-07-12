@@ -19,17 +19,15 @@ LOSS = "absolute_error"
 
 class Loader:
     """
-    Loads the data for train and test from csv files.
+    Loads the data for training and testing.
     """
     def __init__(self, train_path: str, test_path: str):
         """
         Validates and initializes data from file paths.
-        :param train_path: File path for train data csv
-        :param test_path: File path test data csv
+        :param train_path: File path for train data
+        :param test_path: File path test data
         """
-        Loader._validate_paths(train_path, test_path)
-        self.train = pd.read_csv(train_path)
-        self.test = pd.read_csv(test_path)
+        self.train, self.test = Loader._get_train_test_dataframe(train_path, test_path)
 
     @property
     def get_train_columns(self) -> list[str]:
@@ -50,6 +48,17 @@ class Loader:
             raise EmptyPath("train_path")
         if not test_path:
             raise EmptyPath("test_path")
+
+    @staticmethod
+    def _get_train_test_dataframe(train_path: str, test_path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Validates and initializes data from csv files.
+        :param train_path: File path for train data csv
+        :param test_path: File path test data
+        :return: Two dataframes for training and testing
+        """
+        Loader._validate_paths(train_path, test_path)
+        return pd.read_csv(train_path), pd.read_csv(test_path)
 
 
 class Trainer:
