@@ -24,12 +24,12 @@ class Loader:
         self.test = pd.read_csv(test_path)
 
     @property
-    def train_columns(self):
+    def train_columns(self) -> list[str]:
         return [col for col in self.train.columns if col not in COLUMNS_TO_IGNORE]
 
 
 class Trainer:
-    def __init__(self):
+    def __init__(self, loader):
         self.categorical_transformer = TargetEncoder()
         self.preprocessor = ColumnTransformer(transformers=[('categorical',
                                                              self.categorical_transformer,
@@ -42,6 +42,7 @@ class Trainer:
                                                              "loss": LOSS,
                                                              }))]
         self.pipeline = Pipeline(self.steps)
+        self.train_model(loader)
 
     def train_model(self, loader: Loader):
         self.pipeline.fit(loader.train[loader.train_columns], loader.train[TARGET_COLUMN])
