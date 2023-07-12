@@ -5,7 +5,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error
-from exceptions import EmptyPath, DataNotLoaded, ModelNotTrained
+from model.exceptions import EmptyPath, DataNotLoaded, ModelNotTrained
 
 CATEGORICAL_COLUMNS = ["type", "sector"]
 TARGET_COLUMN = "price"
