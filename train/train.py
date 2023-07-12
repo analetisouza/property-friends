@@ -1,12 +1,14 @@
 import pickle
 import uvicorn as uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi.security import APIKeyHeader
+from starlette.status import HTTP_403_FORBIDDEN
 from pydantic import BaseModel
 from model.model import Loader, Trainer, Evaluator
 import logging.handlers
 import datetime
-
-MODEL_FILE_NAME = "trained_model.pkl"
+import os
+from dotenv import load_dotenv
 
 
 class FilePaths(BaseModel):
@@ -16,6 +18,12 @@ class FilePaths(BaseModel):
 
 class ModelPath(BaseModel):
     model_path: str
+
+
+load_dotenv()
+MODEL_FILE_NAME = "trained_model.pkl"
+API_KEY = os.getenv('API_KEY')
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
 app = FastAPI()
@@ -29,8 +37,15 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
+def validate_api_key(api_key: str = Security(api_key_header)):
+    if api_key != API_KEY:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN, detail="Invalid API key"
+        )
+
+
 @app.post("/train")
-def train_model(file_paths: FilePaths):
+def train_model(file_paths: FilePaths, api_key: str = Depends(validate_api_key)):
     try:
         try:
             start_time = datetime.datetime.now()
