@@ -1,14 +1,16 @@
-import pickle
+import pandas as pd
+import numpy as np
 import uvicorn as uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from starlette.status import HTTP_403_FORBIDDEN
 from pydantic import BaseModel
-from model.model import Loader, Trainer, Evaluator
+from model import Loader, Trainer, Evaluator
 import logging.handlers
 import datetime
 import os
 from dotenv import load_dotenv
+import pickle
 
 
 class FilePaths(BaseModel):
@@ -18,6 +20,17 @@ class FilePaths(BaseModel):
 
 class ModelPath(BaseModel):
     model_path: str
+
+
+class PropertyData(BaseModel):
+    type: str
+    sector: str
+    net_usable_area: float
+    net_area: float
+    n_rooms: int
+    n_bathroom: int
+    latitude: float
+    longitude: float
 
 
 load_dotenv()
@@ -73,6 +86,27 @@ def train_model(file_paths: FilePaths, api_key: str = Depends(validate_api_key))
         return ModelPath(model_path=model_path)
 
     except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/predict")
+def predict_price(property_data: PropertyData, api_key: str = Depends(validate_api_key)):
+    with open("trained_model.pkl", "rb") as file:
+        trained_model = pickle.load(file)
+
+    try:
+        features = pd.DataFrame(
+            data={key: [value] for key, value in property_data.dict().items()},
+            columns=property_data.__annotations__.keys()
+        )
+
+        predicted_price = trained_model.predict(features)[0]
+
+        logger.info(f"Prediction finished successfully. The predicted value was {predicted_price}")
+        return {"predicted_price": predicted_price}
+
+    except Exception as e:
+        logger.error("Error occurred during price prediction: %s", str(e))
         return {"error": str(e)}
 
 

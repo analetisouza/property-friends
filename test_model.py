@@ -7,11 +7,11 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 from exceptions import EmptyPath, DataNotLoaded, ModelNotTrained
 
-TRAIN_FILE_PATH = 'model/train.csv'
-TEST_FILE_PATH = 'model/test.csv'
+TRAIN_FILE_PATH = 'train.csv'
+TEST_FILE_PATH = 'test.csv'
 FEATURES = ['type', 'sector', 'net_usable_area', 'net_area', 'n_rooms', 'n_bathroom', 'latitude', 'longitude', 'price']
 FEATURE_TYPES = ['object', 'object', 'float64', 'float64', 'float64', 'float64', 'float64', 'float64', 'int64']
-NUMBER_OF_FEATURES = 9
+NUMBER_OF_FEATURES = 8
 MODEL_TYPE = 'regressor'
 RMSE_THRESHOLD = 11000.0
 MAPE_THRESHOLD = 0.5

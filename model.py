@@ -5,11 +5,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error
-from model.exceptions import EmptyPath, DataNotLoaded, ModelNotTrained
+from exceptions import EmptyPath, DataNotLoaded, ModelNotTrained
 
 CATEGORICAL_COLUMNS = ["type", "sector"]
 TARGET_COLUMN = "price"
-COLUMNS_TO_IGNORE = ['id', 'target']
+COLUMNS_TO_IGNORE = ['id', TARGET_COLUMN]
 
 LEARNING_RATE = 0.01
 NUMBER_OF_ESTIMATORS = 300
